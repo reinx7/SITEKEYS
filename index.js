@@ -74,7 +74,7 @@ app.post('/start-bot', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('KeyBot Hub - Online');
+  res.send('KeyBot Hub - Online✅');
 });
 
 const port = process.env.PORT || 3000;
