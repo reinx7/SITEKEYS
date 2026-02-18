@@ -4,7 +4,7 @@ const app = express();
 
 app.use(express.json());
 
-// CORS 100% permissivo (resolve bloqueios do Lovable)
+// CORS 100% permissivo - resolve bloqueio do Lovable
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -21,7 +21,12 @@ const clients = {};
 app.post('/start-bot', async (req, res) => {
   const { token, userId, durationMinutes } = req.body;
 
-  console.log(`[POST /start-bot] Recebido de ${userId} | Duração: ${durationMinutes} min | Token: ${token ? 'presente' : 'ausente'}`);
+  // Log completo para debug
+  console.log('[POST /start-bot] Recebido:', {
+    userId: userId || 'ausente',
+    durationMinutes: durationMinutes || 'ausente',
+    tokenPresent: !!token
+  });
 
   if (!token || !userId || !durationMinutes) {
     console.log('[ERRO] Campos faltando');
@@ -53,7 +58,7 @@ app.post('/start-bot', async (req, res) => {
     await client.login(token);
     clients[userId] = client;
 
-    console.log(`[INFO] Bot iniciado. Expira em ${durationMinutes} min`);
+    console.log(`[INFO] Bot iniciado com sucesso. Expira em ${durationMinutes} min`);
 
     setTimeout(() => {
       client.destroy();
