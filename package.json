@@ -1,5 +1,16 @@
-"dependencies": {
-  "discord.js": "^14.15.3",
-  "express": "^4.19.2",
-  "ioredis": "^5.4.1"
+{
+  "name": "sitekeys-hub",
+  "version": "1.0.0",
+  "description": "Hub for starting Discord bots via API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
 }
