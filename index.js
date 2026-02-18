@@ -4,15 +4,16 @@ const app = express();
 
 app.use(express.json());
 
-// CORS completo para permitir chamadas do Lovable
+// CORS super permissivo (para funcionar com Lovable e qualquer origem)
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    res.sendStatus(200);
+  } else {
+    next();
   }
-  next();
 });
 
 // Armazena os clientes (sub-bots) por userId
@@ -21,15 +22,13 @@ const clients = {};
 app.post('/start-bot', async (req, res) => {
   const { token, userId, durationMinutes } = req.body;
 
-  console.log(`[POST /start-bot] Recebido de ${userId} com duration ${durationMinutes} min`);
+  console.log(`[POST /start-bot] Recebido de ${userId} | Duração: ${durationMinutes} min`);
 
   if (!token || !userId || !durationMinutes) {
-    console.log('[ERRO] Campos faltando');
     return res.status(400).json({ error: 'Campos faltando' });
   }
 
   if (clients[userId]) {
-    console.log(`[INFO] Bot já rodando para ${userId}`);
     return res.json({ status: 'already running' });
   }
 
@@ -53,9 +52,6 @@ app.post('/start-bot', async (req, res) => {
     await client.login(token);
     clients[userId] = client;
 
-    console.log(`[INFO] Bot iniciado. Expira em ${durationMinutes} min`);
-
-    // Expira automaticamente
     setTimeout(() => {
       client.destroy();
       delete clients[userId];
@@ -64,7 +60,6 @@ app.post('/start-bot', async (req, res) => {
 
     res.json({ status: 'started', message: 'Bot iniciado!' });
   } catch (err) {
-    console.error(`[ERROR] Falha ao iniciar bot para ${userId}:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -75,5 +70,5 @@ app.get('/', (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`[START] Hub rodando na porta ${port} - aguardando POSTs em /start-bot`);
+  console.log(`Hub rodando na porta ${port} - aguardando POSTs`);
 });
