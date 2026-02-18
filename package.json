@@ -1,0 +1,16 @@
+{
+  "name": "keybot-hub-v2",
+  "version": "1.0.0",
+  "description": "Hub para iniciar bots Discord via API do KeyBot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
