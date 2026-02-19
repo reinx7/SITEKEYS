@@ -6,20 +6,18 @@ const app = express();
 
 app.use(express.json());
 
-// CORS total - permite Lovable e qualquer frontend
+// CORS total
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
 // Armazena bots ativos e tokens em uso
-const clients = {}; // client por userId
-const tokenUsage = {}; // token -> userId atual (bloqueio de duplicado)
+const clients = {};
+const tokenUsage = {};
 
 app.post('/start-bot', async (req, res) => {
   const { token, userId, durationMinutes, script } = req.body;
@@ -55,16 +53,23 @@ app.post('/start-bot', async (req, res) => {
   }
 
   try {
-    // Substitui o token no script (procura padrões comuns)
+    // Substitui o token no script (padrões comuns)
     let modifiedScript = script
       .replace(/client\.login\(['"]?TOKEN['"]?\)/g, `client.login("${token}")`)
       .replace(/client\.login\(['"]?process\.env\.TOKEN['"]?\)/g, `client.login("${token}")`)
-      .replace(/client\.login\(TOKEN\)/g, `client.login("${token}")`);
+      .replace(/client\.login\(TOKEN\)/g, `client.login("${token}")`)
+      .replace(/process\.env\.TOKEN/g, `"${token}"`);
 
     // Cria sandbox segura com vm2
     const vm = new VM({
       timeout: durationMinutes * 60 * 1000 + 10000, // tempo máximo + margem
-      sandbox: { console, require, Client, GatewayIntentBits, EmbedBuilder: EmbedBuilder || {} },
+      sandbox: {
+        console,
+        require,
+        Client,
+        GatewayIntentBits,
+        EmbedBuilder: EmbedBuilder || {}
+      },
       require: {
         external: true,
         builtin: ['*'],
@@ -84,7 +89,7 @@ app.post('/start-bot', async (req, res) => {
     });
 
     client.once('ready', () => {
-      console.log(`[SUCCESS] Bot logado com sucesso usando código do produto!`);
+      console.log(`[SUCCESS] Bot logado usando código do produto!`);
       console.log(`   • Nome: ${client.user.tag}`);
       console.log(`   • ID: ${client.user.id}`);
       console.log(`   • Servidores: ${client.guilds.cache.size}`);
@@ -97,13 +102,11 @@ app.post('/start-bot', async (req, res) => {
 
     await client.login(token);
 
-    // Marca o token como em uso
     tokenUsage[token] = userId;
     clients[userId] = client;
 
     console.log(`[INFO] Bot iniciado com sucesso para ${userId} usando código do produto`);
 
-    // Expiração automática
     const expireTime = durationMinutes * 60 * 1000;
     setTimeout(() => {
       client.destroy();
@@ -131,7 +134,6 @@ app.post('/stop-bot', (req, res) => {
   clients[userId].destroy();
   delete clients[userId];
 
-  // Libera todos os tokens associados
   for (const token in tokenUsage) {
     if (tokenUsage[token] === userId) {
       delete tokenUsage[token];
