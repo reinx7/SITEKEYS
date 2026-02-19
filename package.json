@@ -1,5 +1,17 @@
-"dependencies": {
-  "discord.js": "^14.15.3",
-  "express": "^4.19.2",
-  "vm2": "^3.9.19"
+{
+  "name": "sitekeys-hub",
+  "version": "1.0.0",
+  "description": "Hub para iniciar bots Discord via API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "express": "^4.19.2",
+    "vm2": "^3.9.19"
+  },
+  "engines": {
+    "node": "18.x"
+  }
 }
